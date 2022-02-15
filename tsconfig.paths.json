@@ -1,0 +1,9 @@
+// 필요하면 적용 예정
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": [ "src/*" ],
+    }
+  }
+}
