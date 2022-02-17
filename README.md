@@ -7,7 +7,7 @@ Virtual scroller using react onScroll Event
 Scrolling and dynamically fetching content
 
 ## Demo
-preparing...
+codeSandBox: [Demo](https://codesandbox.io/s/react-virtual-scroll-hook-nhzkrc)
 
 ## install
 ```
