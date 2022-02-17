@@ -16,102 +16,77 @@ npm install --save react-virtual-scroll-hook
 
 ## Example
 ```javascript
-import React, { useState, useRef, useMemo } from "react";
-import {
-  FlattenInterpolation,
-  ThemedStyledProps,
-  css,
-} from "styled-components";
-import { IGetApiDataReturn } from "@src/hooks/useInfiniteScroll";
-import useVirtualScroll, {
-  IVirtualScrollSettings,
-} from "@src/hooks/useVirtualScroll";
+import { StrictMode } from "react";
+import ReactDOM from "react-dom";
+import useVirtualScroll from '../src/useVirtualScroll'
 
-import LoadingCircle from "@src/components/common/LoadingCircle";
-import {
-  spinAnimation,
-  circleWrapAnimation,
-} from "@src/components/common/LoadingCircle/styles";
+const dummyArray = Array.from({length: 600}, (v, i) => i);
 
-import * as S from "./styles";
+// configuration
+const VIRTUAL_SCROLL_SETTINGS = {
+  styles: {
+      height: 50,
+  },
+  virtualStartIndex: 5,
+  sliceAmount: 20,
+  maxIndex: 300,
+  dataFetchTriggerIndex: 50
+};
 
-export interface VirtualScrollBoxProps {
-  settings: IVirtualScrollSettings;
-  getter: (startIndex: number) => Array<any>;
-  wrapCss?: FlattenInterpolation<ThemedStyledProps<any, any>>;
-  // data fetching while scrolling
-  dataFetch?: (
-    _hasNext: boolean | null,
-    _nextCursor: string
-  ) => IGetApiDataReturn;
-  debouncingDelay?: number;
+const template = (startIndex, sliceAmount = VIRTUAL_SCROLL_SETTINGS.sliceAmount) => {
+    return dummyArray.slice(startIndex, startIndex + sliceAmount).map(item => {
+        return <div>{item}</div>
+    })
 }
 
-// css 외부로 확장필요
-const LoadingCircleWrapStyle = css`
-  margin: 7px 0;
-  width: 30px;
-  height: 30px;
-  animation: 1.5s ${circleWrapAnimation()} infinite linear;
-`;
-
-const LoadingCircleStyle = css`
-  stroke-width: 2px;
-  r: calc(30px / 2 - (2px / 2));
-  stroke-dasharray: calc(3.14 * (2 * (30px / 2 - (2px / 2))));
-  animation: 2s ${spinAnimation(2 * (30 / 2 - 2 / 2))} infinite linear;
-`;
-
-export default function VirtualScrollBox({
-  settings,
-  getter,
-  wrapCss,
-  dataFetch,
-  debouncingDelay = 500,
-}: VirtualScrollBoxProps) {
-  const itemHeight = settings.styles.height;
+const App = () => {
+  const itemHeight = VIRTUAL_SCROLL_SETTINGS.styles.height;
   const { isLoading, onScrollHandler, translateYValue, dataList } =
     useVirtualScroll({
-      settings: settings,
-      itemHeight: itemHeight,
-      templateGetter: getter,
-      dataFetch: dataFetch,
-      debouncingDelay: debouncingDelay,
+      settings: VIRTUAL_SCROLL_SETTINGS,
+      itemHeight: VIRTUAL_SCROLL_SETTINGS.styles.height,
+      templateGetter: template,
+      dataFetch: null,
     });
 
   return (
     <>
-      <S.VirtualScrollBoxWrap
+      <div
         onScroll={(e) => onScrollHandler(e)}
-        wrapCss={wrapCss}
+        style={{
+            maxHeight: 400,
+            overflow: 'scroll',
+            backgroundColor: 'green'
+        }}
       >
         <div
           className="viewport"
           style={{
             height:
-              settings.styles.height * settings.maxIndex +
+              VIRTUAL_SCROLL_SETTINGS.styles.height * VIRTUAL_SCROLL_SETTINGS.maxIndex +
               (isLoading ? itemHeight : 0),
           }}
         >
           <div
-            className="scrollAreat"
+            className="scrollArea"
             style={{
               willChange: "transform",
               transform: `translateY(${translateYValue}px)`,
             }}
           >
             {dataList}
-            <S.VirtualScrollBoxLoadingWrap>
-              <LoadingCircle
-                wrapCss={LoadingCircleWrapStyle}
-                circleCss={LoadingCircleStyle}
-                isLoading={isLoading}
-              />
-            </S.VirtualScrollBoxLoadingWrap>
           </div>
         </div>
-      </S.VirtualScrollBoxWrap>
+      </div>
     </>
   );
 }
+
+const rootElement = document.getElementById("root");
+ReactDOM.render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+  rootElement
+);
 ```
