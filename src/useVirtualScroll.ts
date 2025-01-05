@@ -1,5 +1,5 @@
-import { useRef, useState, useMemo, useEffect } from 'react';
-import _, { DebouncedFunc as IDebouncedFunc } from 'lodash';
+import { useRef, useState, useMemo, useEffect, useCallback, useTransition } from 'react';
+import { debounce } from './utils';
 
 export interface IVirtualScrollItemsStyles {
   height: number;
@@ -37,34 +37,37 @@ export default function useVirtualScroll({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [translateYValue, setTranslateYValue] = useState(0);
   const [startNode, setStartNode] = useState(0);
+  const [isPending, startTransition] = useTransition();
 
   const isRunningFetch = useRef<boolean>(false);
   const hasNextRef = useRef<boolean | null>(null);
   const nextCursorQueryStringRef = useRef<string>('');
-  const debouncerRef = useRef<null | IDebouncedFunc<any>>(null);
+  const debouncerRef = useRef<null | ReturnType<typeof debounce>>(null);
 
   const dataList = useMemo(
     () => templateGetter(startNode),
     [templateGetter, startNode],
   );
 
-  const requestAnimationFramer = (scrollTop: number) =>
+  const requestAnimationFramer = useCallback((scrollTop: number) => {
     requestAnimationFrame(() => {
       setScrollTop(scrollTop);
     });
-  const onScrollHandler = (e: any) => {
+  }, []);
+
+  const onScrollHandler = useCallback((e: any) => {
     const {
       target: { scrollTop },
     } = e;
     if (debouncerRef.current) {
       debouncerRef.current(scrollTop);
     }
-    requestAnimationFramer(scrollTop);
-  };
+    setScrollTop(scrollTop);
+  }, []);
 
-  const getDataList = async (_currentIndex: number) => {
+  const getDataList = useCallback(async (_currentIndex: number) => {
     if (_currentIndex >= settings.maxIndex - settings.dataFetchTriggerIndex) {
-      if (isRunningFetch.current === false) {
+      if (!isRunningFetch.current) {
         let _hasNext = null;
         let _nextCursor = '';
 
@@ -84,7 +87,7 @@ export default function useVirtualScroll({
         setIsLoading(false);
       }
     }
-  };
+  }, [dataFetch, settings.maxIndex, settings.dataFetchTriggerIndex]);
 
   useEffect(() => {
     const currentIndex = Math.floor(scrollTop / settings.styles.height);
@@ -93,8 +96,10 @@ export default function useVirtualScroll({
       0,
     );
 
-    setTranslateYValue(startNode * settings.styles.height);
-    setStartNode(startNode);
+    startTransition(() => {
+      setTranslateYValue(startNode * settings.styles.height);
+      setStartNode(startNode);
+    });
 
     if (settings.maxIndex > 0) {
       getDataList(currentIndex);
@@ -102,13 +107,13 @@ export default function useVirtualScroll({
   }, [scrollTop]);
 
   useEffect(() => {
-    debouncerRef.current = _.debounce((_scrollTop: number) => {
+    debouncerRef.current = debounce((_scrollTop: number) => {
       requestAnimationFramer(_scrollTop);
     }, debouncingDelay);
-  }, []);
+  }, [debouncingDelay, requestAnimationFramer]);
 
   return {
-    isLoading: isLoading,
+    isLoading: isLoading || isPending,
     onScrollHandler: onScrollHandler,
     translateYValue: translateYValue,
     dataList: dataList,
