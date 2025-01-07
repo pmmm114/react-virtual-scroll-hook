@@ -1,0 +1,18 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  // 파일을 저장할 때마다 `eslint` 규칙에 따라 자동으로 코드를 수정
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.formatOnSave": true,
+  // Prettier
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.configPath": ".prettierrc.cjs",
+  "prettier.prettierPath": "./node_modules/prettier",
+  // 자동 가져오기는 기본적으로 tsconfig에 정의된 절대경로를 사용
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "eslint.format.enable": false,
+  "eslint.ignoreUntitled": false,
+  "eslint.run": "onType",
+}
