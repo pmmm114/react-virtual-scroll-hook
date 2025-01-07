@@ -2,14 +2,7 @@ module.exports = {
   root: true,
   env: { browser: true, es2020: true, node: true },
   parser: '@typescript-eslint/parser',
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react-hooks/recommended',
-    'eslint-config-prettier',
-    'plugin:import/recommended',
-    'plugin:import/typescript',
-  ],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:react-hooks/recommended', 'eslint-config-prettier', 'plugin:import/recommended', 'plugin:import/typescript', 'plugin:storybook/recommended'],
   plugins: ['import', 'react-refresh'],
   settings: {
     'import/resolver': {
