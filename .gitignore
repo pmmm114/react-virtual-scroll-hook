@@ -5,3 +5,4 @@ node_modules/
 .npmignore
 
 .wakatime-project
+*storybook.log
