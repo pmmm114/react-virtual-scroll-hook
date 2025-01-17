@@ -1,0 +1,17 @@
+.virtualScrollLayout {
+  background-color: green;
+  height: 400px;
+  overflow-y: auto;
+  contain: strict;
+}
+.virtualScroll {
+  position: relative;
+  width: 100%;
+}
+
+.virtualScroller {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+}
